@@ -1,4 +1,7 @@
+import 'package:get_it/get_it.dart';
 import 'package:pizza_delivery_api/application/config/pizza_delivery_configuration.dart';
+import 'package:pizza_delivery_api/application/config/service_locator_config.dart';
+import 'package:pizza_delivery_api/application/routers/routers_configure.dart';
 import 'package:pizza_delivery_api/pizza_delivery_api.dart';
 
 class PizzaDeliveryApiChannel extends ApplicationChannel {
@@ -6,15 +9,16 @@ class PizzaDeliveryApiChannel extends ApplicationChannel {
   Future prepare() async {
     logger.onRecord.listen(
         (rec) => print("$rec ${rec.error ?? ""} ${rec.stackTrace ?? ""}"));
-    PizzaDeliveryConfiguration(options.configurationFilePath);
+    GetIt.I.registerLazySingleton(
+        () => PizzaDeliveryConfiguration(options.configurationFilePath));
+    configureDependencies();
   }
 
   @override
   Controller get entryPoint {
     final router = Router();
-    router.route("/example").linkFunction((request) async {
-      return Response.ok({"key": "value"});
-    });
+
+    RoutersConfigure(router).configure();
 
     return router;
   }
